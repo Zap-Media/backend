@@ -8,15 +8,17 @@ from config import Config
 
 @bp.route('/authorize/<provider>')
 def oauth2_authorize(provider):
-
     provider_data = Config.OAUTH2_PROVIDERS.get(provider)
 
     session['oauth2_state'] = secrets.token_urlsafe(16)
 
+    redirect_url = request.args.get("redirect")
+    if redirect_url not in Config.ALLOWED_REDIRECTS:
+        return abort(406)
+
     qs = urlencode({
         'client_id': provider_data['client_id'],
-        'redirect_uri': url_for('auth.oauth2_callback', provider=provider,
-                                _external=True),
+        'redirect_uri': redirect_url,
         'response_type': 'code',
         'scope': ' '.join(provider_data['scopes']),
         'state': session['oauth2_state'],
@@ -47,12 +49,14 @@ def oauth2_callback(provider):
         'client_secret': provider_data['client_secret'],
         'code': request.args['code'],
         'grant_type': 'authorization_code',
-        'redirect_uri': url_for('auth.oauth2_callback', provider=provider,
-                                _external=True),
+        'redirect_uri': request.args['redirect'],
     }, headers={'Accept': 'application/json'})
+
     if response.status_code != 200:
         abort(401)
+    
     oauth2_token = response.json().get('access_token')
+
     if not oauth2_token:
         abort(401)
 
@@ -62,7 +66,7 @@ def oauth2_callback(provider):
     })
     if response.status_code != 200:
         abort(401)
-        
+
     email = provider_data['userinfo']['email'](response.json())
 
     return email

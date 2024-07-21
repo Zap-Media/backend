@@ -27,17 +27,6 @@ class Config:
             },
             'scopes': ['https://www.googleapis.com/auth/userinfo.email'],
         },
-        'github': {
-            'client_id': os.environ.get('GITHUB_CLIENT_ID'),
-            'client_secret': os.environ.get('GITHUB_CLIENT_SECRET'),
-            'authorize_url': 'https://github.com/login/oauth/authorize',
-            'token_url': 'https://github.com/login/oauth/access_token',
-            'userinfo': {
-                'url': 'https://api.github.com/user/emails',
-                'email': lambda data: next((x['email'] for x in data if x['primary'] == True), None),
-            },
-            'scopes': ['user:email'],
-        },
         'discord': {
             'client_id': os.environ.get('DISCORD_CLIENT_ID'),
             'client_secret': os.environ.get('DISCORD_CLIENT_SECRET'),
@@ -50,3 +39,11 @@ class Config:
             'scopes': ['identify email'],
         },
     }
+    ALLOWED_REDIRECTS = [
+        "https://zap-social.vercel.app/auth/callback/google",
+        "https://zap-social.vercel.app/auth/callback/discord",
+        "https://zap-blogs.vercel.app/auth/callback/google",
+        "https://zap-blogs.vercel.app/auth/callback/discord",
+        "https://zapfolio.vercel.app/auth/callback/google",
+        "https://zapfolio.vercel.app/auth/callback/discord",
+    ]
