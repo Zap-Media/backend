@@ -4,6 +4,7 @@ from urllib.parse import urlencode
 import requests
 
 from app.auth import bp
+from app.auth import utils
 from config import Config
 from app import db
 

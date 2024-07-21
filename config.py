@@ -17,6 +17,7 @@ class Config:
     GITHUB_CLIENT_SECRET    = os.environ.get('GITHUB_CLIENT_SECRET')
 
     ImagekitID              = os.environ.get('ImagekitID')
+    JWT_SECRET              = os.environ.get('JWT_SECRET')
 
     OAUTH2_PROVIDERS        =  {
         'google': {
@@ -54,3 +55,8 @@ class Config:
     SERVICES = [
         "zap-social", "zap-blogs", "zapfolio"
     ]
+
+    TOKEN_EXP = {
+        "access": 1,
+        "refresh": 30
+    }
