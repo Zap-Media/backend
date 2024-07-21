@@ -5,6 +5,7 @@ import requests
 
 from app.auth import bp
 from config import Config
+from app import db
 
 @bp.route('/authorize/<provider>')
 def oauth2_authorize(provider):
@@ -44,6 +45,9 @@ def oauth2_callback(provider):
     if 'code' not in request.args:
         abort(401)
 
+    if request.args.get("service") not in Config.SERVICES:
+        abort(406)
+
     response = requests.post(provider_data['token_url'], data={
         'client_id': provider_data['client_id'],
         'client_secret': provider_data['client_secret'],
@@ -68,5 +72,14 @@ def oauth2_callback(provider):
         abort(401)
 
     email = provider_data['userinfo']['email'](response.json())
+
+    user = db.fetch_user("email", email)
+    if user is None:
+        user = db.create_user(email)
+
+    if request.args.get("service") == "zap-social":
+        sub_user = db.fetch_sub_user(db.social_users, "email", email)
+        if sub_user is None:
+            sub_user = db.create_social_user(user['_id'])
 
     return email

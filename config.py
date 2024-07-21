@@ -1,4 +1,7 @@
+from dotenv import load_dotenv
 import os
+
+load_dotenv()
 
 class Config:
     SECRET_KEY              = os.environ.get('SECRET_KEY')
@@ -46,4 +49,8 @@ class Config:
         "https://zap-blogs.vercel.app/auth/callback/discord",
         "https://zapfolio.vercel.app/auth/callback/google",
         "https://zapfolio.vercel.app/auth/callback/discord",
+    ]
+
+    SERVICES = [
+        "zap-social", "zap-blogs", "zapfolio"
     ]
