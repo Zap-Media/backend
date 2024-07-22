@@ -8,22 +8,21 @@ from app.auth import utils
 from config import Config
 from app import db
 
+print('yes')
+
 @bp.route('/authorize/<provider>')
 def oauth2_authorize(provider):
     provider_data = Config.OAUTH2_PROVIDERS.get(provider)
 
-    session['oauth2_state'] = secrets.token_urlsafe(16)
-
     redirect_url = request.args.get("redirect")
     if redirect_url not in Config.ALLOWED_REDIRECTS:
-        return abort(406)
+        abort(406)
 
     qs = urlencode({
         'client_id': provider_data['client_id'],
         'redirect_uri': redirect_url,
         'response_type': 'code',
         'scope': ' '.join(provider_data['scopes']),
-        'state': session['oauth2_state'],
     })
 
     return redirect(provider_data['authorize_url'] + '?' + qs)
@@ -38,10 +37,7 @@ def oauth2_callback(provider):
         for k, v in request.args.items():
             if k.startswith('error'):
                 flash(f'{k}: {v}')
-        return redirect(url_for('index'))
-
-    if request.args['state'] != session.get('oauth2_state'):
-        abort(401)
+        return redirect(url_for('index')), 406
 
     if 'code' not in request.args:
         abort(401)
@@ -78,9 +74,13 @@ def oauth2_callback(provider):
     if user is None:
         user = db.create_user(email)
 
-    if request.args.get("service") == "zap-social":
+    service = request.args.get("service")
+
+    if service == "zap-social":
         sub_user = db.fetch_sub_user(db.social_users, "email", email)
         if sub_user is None:
             sub_user = db.create_social_user(user['_id'])
 
-    return email
+    tokens = utils.gen_tokens(user, sub_user, service)
+
+    return tokens, 200

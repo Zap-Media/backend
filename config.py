@@ -50,6 +50,8 @@ class Config:
         "https://zap-blogs.vercel.app/auth/callback/discord",
         "https://zapfolio.vercel.app/auth/callback/google",
         "https://zapfolio.vercel.app/auth/callback/discord",
+        "http://127.0.0.1:6969/auth/callback/discord",
+        "http://127.0.0.1:6969/auth/callback/google"
     ]
 
     SERVICES = [

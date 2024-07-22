@@ -24,14 +24,16 @@ class Database:
         return db.find_one({key: value})
 
     def create_user(self, email):
-        name = email.split("@")[0] + "".join([random.randint(0, 9) for _ in range(10)])
+        name = email.split("@")[0] + "".join([str(random.randint(0, 9)) for _ in range(10)])
         user_obj = {
             "_id": str(uuid4()),
             "username": name,
             "name": name,
+            "email": email,
             "created": datetime.now().timestamp()
         }
         self.users.insert_one(user_obj)
+        return user_obj
 
     def create_social_user(self, user_id):
         user_obj = {
@@ -45,3 +47,4 @@ class Database:
             "following": []
         }
         self.social_users.insert_one(user_obj)
+        return user_obj
