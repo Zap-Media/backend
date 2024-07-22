@@ -26,16 +26,17 @@ def gen_tokens(user_obj, sub_user, service):
         "success": True,
         "access_token": jwt.encode(access_obj, Config.JWT_SECRET),
         "refresh_token": jwt.encode(refresh_obj, Config.JWT_SECRET),
-    }
+    }, 200
 
 def regen_tokens(refresh_token):
     try:
-        refresh_obj = jwt.decode(refresh_token, Config.JWT_SECRET)
+        refresh_obj = jwt.decode(refresh_token, Config.JWT_SECRET, algorithms=['HS256'])
     except jwt.ExpiredSignatureError:
-        return {"success": False, "message": "refresh token expired"}
+        return {"success": False, "message": "refresh token expired"}, 401
+    except jwt.DecodeError:
+        return {"success": False, "message": "malformed refresh token"}, 401
     except Exception as e:
-        return {"success": False, "message": e}
-    
+        return {"success": False, "message": str(e)}, 401
     _id = refresh_obj['_id']
     service = refresh_obj['service']
     user = db.fetch_user("_id", _id)
@@ -49,7 +50,7 @@ def validate_access_token(access_token):
     try:
         decoded = jwt.decode(access_token, Config.JWT_SECRET)
     except jwt.ExpiredSignatureError:
-        return {"success": False, "message": "access token expired"}
+        return {"success": False, "message": "access token expired"}, 401
     except Exception as e:
-        return {"success": False, "message": e}
-    return {"success": True, "obj": decoded}
+        return {"success": False, "message": str(e)}, 401
+    return {"success": True, "obj": decoded}, 200

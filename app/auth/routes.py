@@ -8,8 +8,6 @@ from app.auth import utils
 from config import Config
 from app import db
 
-print('yes')
-
 @bp.route('/authorize/<provider>')
 def oauth2_authorize(provider):
     provider_data = Config.OAUTH2_PROVIDERS.get(provider)
@@ -83,4 +81,11 @@ def oauth2_callback(provider):
 
     tokens = utils.gen_tokens(user, sub_user, service)
 
-    return tokens, 200
+    return tokens
+
+@bp.route("/regen-token")
+def regen():
+    token = request.args.get("refresh_token")
+    if token is None:
+        abort(401)
+    return utils.regen_tokens(token)
